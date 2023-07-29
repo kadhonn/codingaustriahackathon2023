@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&display=swap');
+
+:root {
+    --np-text-color: #0c1d36;
+
+    --background-gradient: linear-gradient(45deg, #57DBE9, #57DBE9, #CE37B9, #CE37B9);
+    --gradient: linear-gradient(45deg, #57DBE9, #CE37B9);
+    --drop-shadow: 0 0 8px rgba(12, 29, 54, 0.25);
+
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    font-family: 'Outfit', sans-serif;
+}
+
+body,
+a,
+button,
+p,
+span {
+    font-family: 'Outfit', sans-serif;
+    color: var(--np-text-color);
+}
+
+h1 {
+    margin: 0;
+    font-weight: bolder;
+    font-size: 36px;
+}
+
+.spacer {
+    flex-grow: 1;
+}
