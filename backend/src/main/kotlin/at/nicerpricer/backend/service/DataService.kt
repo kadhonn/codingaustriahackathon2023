@@ -74,14 +74,10 @@ class DataService(
                 tokenStream.reset()
 
                 while (tokenStream.incrementToken()) {
-                    val token = names.substring(
-                        offsetAttribute.startOffset(),
-                        offsetAttribute.endOffset()
-                    )
                     builder.add(
                         BooleanClause(
                             WildcardQuery(
-                                Term("name", "$token*")
+                                Term("name", "$offsetAttribute*")
                             ),
                             BooleanClause.Occur.MUST
                         )
