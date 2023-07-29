@@ -11,6 +11,8 @@ cd ..
 
 #build and push frontend
 cd frontend
+npm install
+npm run build
 docker build -t registry.slothyx.com/nicerpricer-frontend .
 docker push registry.slothyx.com/nicerpricer-frontend
 cd ..
