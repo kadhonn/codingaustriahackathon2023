@@ -1,36 +1,90 @@
 <script setup lang="ts">
+import type {ShoppingItem} from "@/api/dto";
+import {ref} from "vue";
+import AutoCompleteComponent from "@/components/AutoCompleteComponent.vue";
 
-defineProps<{
-  items: string[]
+const props = defineProps<{
+  items: ShoppingItem[]
 }>()
+const emit = defineEmits<{
+  change: [value: ShoppingItem[]]
+}>()
+
+const allItems = ref(props.items)
+const newItem = ref({name: '', quantity: 1} as ShoppingItem)
+
+const addItem = (name: string) => {
+  newItem.value.name = name
+  allItems.value.push({...newItem.value})
+
+  newItem.value.name = ''
+  newItem.value.quantity = 1
+
+  emit('change', allItems.value)
+}
+
+const editName = (item: ShoppingItem, name: string) => {
+  const index = allItems.value.indexOf(item)
+  item.name = name
+  allItems.value[index] = {...item}
+  emit('change', allItems.value)
+}
 </script>
 
 <template>
   <div class="listContainer">
     <ul>
-      <li v-for="item in items" :key="item">{{item}}</li>
+      <li
+          v-for="item in items"
+          :key="item"
+      >
+        <div class="listItemContainer">
+          <div class="inputContainer">
+            <input
+                class="numberInput"
+                type="number"
+                v-model="item.quantity"
+                @change="$emit('change', allItems)"
+            />
+            <AutoCompleteComponent class="newItemInput" :value="item.name" @change="editName(item, $event)"/>
+
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="listItemContainer">
+          <div class="inputContainer">
+            <input
+                class="numberInput"
+                type="number"
+                v-model="newItem.quantity"
+                @change="$emit('change', allItems)"
+            />
+            <AutoCompleteComponent class="newItemInput" @change="addItem($event)"/>
+          </div>
+        </div>
+      </li>
     </ul>
   </div>
 </template>
 
 <style scoped>
 .listContainer {
-  font-family: 'Gloria Hallelujah', cursive;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
 }
 
 ul {
   list-style-position: inside;
-  width: 600px;
-  max-width: 100%;
-  background: white;
-  box-shadow: 0.25rem 0.25rem 0.75rem rgb(0 0 0 / 0.15);
+  width: 100%;
   padding: 0;
   margin: 0;
-  border-radius: 0.1rem;
 }
 
 li {
   padding: 0 0 0 1rem;
+  width: 100%;
 }
 
 li:not(:last-child) {
@@ -55,5 +109,44 @@ li:nth-child(3n)::marker {
 
 li:nth-child(3n - 1)::marker {
   content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' width='14' viewBox='0 0 50 50'%3E%3Cpath d='M48.3 23.7c-1-9.9-9.9-15.6-18.8-17.8-8.2-2.1-18.8-2.6-24.6 4.8C.6 16.2 1 23.6 4.3 29.3c-.5 1-.8 2-1 3-.6 4 2 7.6 5.1 10 5.9 4.4 14 4.2 19.6-.4 1.5 0 2.9-.2 4.4-.5 1.8 0 3.5 0 5.3-.1 2.3-.1 3.5-1.9 3.5-3.7 4.5-3.3 7.7-8.2 7.1-13.9zM9.1 17.8c1.1-4.1 4.9-5.8 8.8-6.1.9-.1 1.9-.1 2.9-.1-3.2 1.6-6.3 4.6-8 7.4-.1.1-.1.2-.2.3-1.1.9-2.1 1.9-3 2.9-.2.2-.4.4-.5.6-.4-1.7-.5-3.3 0-5z'/%3E%3C/svg%3E") ' ';
+}
+
+.listItemContainer {
+  display: inline-block;
+  box-sizing: border-box;
+  position: relative;
+
+  width: 95%;
+}
+
+
+.inputContainer {
+  display: flex;
+  flex-flow: row;
+}
+
+.numberInput, .textInput {
+  box-sizing: border-box;
+  margin: 8px;
+  background-color: white;
+  font-size: 24px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  box-shadow: var(--drop-shadow);
+  font-family: 'Gloria Hallelujah', cursive;
+  max-lines: 1;
+  height: 56px;
+}
+
+.numberInput {
+  width: 15%;
+  padding: 2px 8px;
+}
+
+.newItemInput {
+  box-sizing: border-box;
+  flex-grow: 1;
+  margin: 8px;
 }
 </style>

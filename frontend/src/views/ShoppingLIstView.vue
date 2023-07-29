@@ -2,19 +2,12 @@
 import {useAuthStore} from "@/stores/auth";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import {ref} from "vue";
-import AutoComplete from "primevue/autocomplete";
 import ListComponent from "@/components/ListComponent.vue";
+import type {ShoppingItem} from "@/api/dto";
 
 const authStore = useAuthStore()
 
-const currentInput = ref("");
-const suggestions = ref([]);
-
-const items = ref(["Karrotten", "Bananen", "Schokolade", "Bier"]);
-
-const search = (event) => {
-  suggestions.value = [...Array(10).keys()].map((item) => event.query + '-' + item);
-}
+const items = ref([] as ShoppingItem[]);
 </script>
 
 <template>
@@ -23,13 +16,8 @@ const search = (event) => {
       <h1>Erstelle deine Einkaufsliste</h1>
 
 
-      <ListComponent :items="items"/>
+      <ListComponent class="shoppingListContainer" :items="items" @change="value => items = value"/>
 
-      <AutoComplete
-          v-model="currentInput"
-          :suggestions="suggestions"
-          @complete="search"
-          placeholder="Bier"/>
       <span class="spacer"/>
 
       <ButtonComponent class="button">Jetzt einkaufen</ButtonComponent>
@@ -68,8 +56,19 @@ const search = (event) => {
   align-self: end;
 }
 
-.listContainer {
-  align-self: start;
+.shoppingListContainer {
+  flex: 1 1 auto; /* formerly flex: 1 0 auto; */
+
+  overflow: auto;
+}
+
+.addContainer {
+  width: 100%;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 @media only screen and (max-width: 800px) {

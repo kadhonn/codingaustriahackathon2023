@@ -36,5 +36,9 @@ defineEmits(['click'])
   background: white;
 }
 
+.secondary {
+  padding: 8px 16px;
+}
+
 
 </style>
