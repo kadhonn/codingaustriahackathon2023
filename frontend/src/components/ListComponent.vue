@@ -36,7 +36,7 @@ const editName = (item: ShoppingItem, name: string) => {
     <ul>
       <li
           v-for="item in items"
-          :key="item"
+          :key="item.name"
       >
         <div class="listItemContainer">
           <div class="inputContainer">
