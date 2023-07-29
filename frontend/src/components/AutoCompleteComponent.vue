@@ -91,4 +91,15 @@ const selectSuggestion = (suggestion: string) => {
   background: #eeeeee;
   cursor: pointer;
 }
+
+@media only screen and (max-width: 800px) {
+  .autoCompleteInput {
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .autoCompleteSuggestion {
+    font-size: 14px;
+  }
+}
 </style>

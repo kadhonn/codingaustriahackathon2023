@@ -57,23 +57,14 @@ const items = ref([] as ShoppingItem[]);
 }
 
 .shoppingListContainer {
-  flex: 1 1 auto; /* formerly flex: 1 0 auto; */
+  flex: 1 1 auto;
 
   overflow: auto;
 }
 
-.addContainer {
-  width: 100%;
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
 @media only screen and (max-width: 800px) {
   .background {
-    padding: 32px;
+    padding: 16px;
   }
 }
 </style>

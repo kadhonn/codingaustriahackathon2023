@@ -140,6 +140,7 @@ li:nth-child(3n - 1)::marker {
 }
 
 .numberInput {
+  box-sizing: border-box;
   width: 15%;
   padding: 2px 8px;
 }
@@ -148,5 +149,16 @@ li:nth-child(3n - 1)::marker {
   box-sizing: border-box;
   flex-grow: 1;
   margin: 8px;
+}
+
+@media only screen and (max-width: 800px) {
+  .numberInput {
+    height: 32px;
+    font-size: 16px;
+  }
+
+  ul {
+    list-style: none;
+  }
 }
 </style>

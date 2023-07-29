@@ -79,5 +79,10 @@ const login = () => {
   .container {
     width: 90%;
   }
+
+  .textInput {
+    font-size: 16px;
+    padding: 12px;
+  }
 }
 </style>
