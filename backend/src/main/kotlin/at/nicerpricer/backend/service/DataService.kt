@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.stereotype.Service
 import java.io.File
 
-val JACKSON_MAPPER = ObjectMapper()
+val JACKSON_MAPPER: ObjectMapper = ObjectMapper()
     .registerModule(KotlinModule.Builder().build())
     .registerModule(JavaTimeModule())
 
@@ -16,11 +16,16 @@ val JACKSON_MAPPER = ObjectMapper()
 class DataService {
     private val data: List<Data> = loadData()
 
-
     fun first(): Data {
         return data.first()
     }
 
+    fun query(nameQuery: String): List<String> {
+        return data.asSequence()
+            .filter { it.name!!.contains(nameQuery, true) }
+            .mapNotNull { it.name }
+            .toList()
+    }
 
     private fun loadData(): List<Data> {
         return JACKSON_MAPPER.readValue(
