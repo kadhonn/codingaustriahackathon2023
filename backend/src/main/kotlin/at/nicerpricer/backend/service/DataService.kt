@@ -29,6 +29,7 @@ class DataService(
         return data.asSequence()
             .mapNotNull { it.name }
             .filter { it.contains(nameQuery, true) }
+            .distinctBy { it.lowercase() }
             .take(10)
             .toList()
     }
