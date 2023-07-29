@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
 
@@ -13,8 +14,10 @@ val JACKSON_MAPPER: ObjectMapper = ObjectMapper()
     .registerModule(JavaTimeModule())
 
 @Service
-class DataService {
-    private val data: List<Data> = loadData()
+class DataService(
+    @Value("\${nicerpricer.file.path}") filePath: String,
+) {
+    private val data: List<Data> = loadData(filePath)
 
     fun first(): Data {
         return data.first()
@@ -27,9 +30,9 @@ class DataService {
             .toList()
     }
 
-    private fun loadData(): List<Data> {
+    private fun loadData(filePath: String): List<Data> {
         return JACKSON_MAPPER.readValue(
-            File("C:\\projects\\codingaustriahackathon2023\\latest-canonical.json"),
+            File(filePath),
             object : TypeReference<List<Data>>() {})
     }
 }
