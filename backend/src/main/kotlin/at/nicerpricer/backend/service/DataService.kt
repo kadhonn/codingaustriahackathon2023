@@ -30,7 +30,8 @@ val JACKSON_MAPPER: ObjectMapper = ObjectMapper()
 
 @Service
 class DataService(
-    @Value("\${nicerpricer.file.path}") filePath: String,
+        @Value("\${nicerpricer.file.path}") filePath: String,
+        @Value("\${nicerpricer.google.api-key}") private val googleApiKey: String,
 ) {
 
     private val data: List<Data>
@@ -104,7 +105,7 @@ class DataService(
     }
 
     fun shop(groceryList: GroceryList): ShoppingTrip {
-        return ShoppingTripPlaner(groceryList, data).calculate()
+        return ShoppingTripPlaner(googleApiKey, groceryList, data).calculate()
     }
 
     private fun loadData(filePath: String): List<Data> {

@@ -3,11 +3,16 @@ package at.nicerpricer.backend.model
 import java.util.Optional
 
 data class GroceryList(
-    val items: List<GroceryItem>?,
-    val location: Optional<String>?, //TODO
+        val items: List<GroceryItem>?,
+        val location: Optional<Location>?,
+)
+
+data class Location(
+        val latitude: Double,
+        val longitude: Double
 )
 
 data class GroceryItem(
-    val name: String?,
-    val quantity: Int?,
+        val name: String?,
+        val quantity: Int?,
 )
