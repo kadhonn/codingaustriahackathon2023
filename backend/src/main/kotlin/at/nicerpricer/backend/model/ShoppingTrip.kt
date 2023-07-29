@@ -2,7 +2,7 @@ package at.nicerpricer.backend.model
 
 data class ShoppingTrip(
         val stops: List<ShoppingStop>?,
-        val unreachable: List<GroceryItem>?
+        val unreachable: Map<GroceryItem, List<String>>?
 )
 
 data class ShoppingStop(

@@ -20,7 +20,7 @@ class ShoppingTripPlaner(
     private val objectMapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
     private val stops = mutableMapOf<Place, MutableList<GroceryItem>>()
-    private val notFound = mutableListOf<GroceryItem>()
+    private val notFound = mutableMapOf<GroceryItem, List<String>>()
     private val cache = mutableMapOf<String, Place>()
 
     fun calculate(): ShoppingTrip {
@@ -39,7 +39,7 @@ class ShoppingTripPlaner(
                 }
             }
             if (!stopFound) {
-                notFound.add(item)
+                notFound[item] = shops.map { shop -> shop.store as String }.toList()
             }
         }
 
