@@ -56,14 +56,19 @@ class DataService(
 
     fun query(names: String): List<String> {
         val query = buildQuery(names)
-        val result = indexSearcher.search(query, 40)
+        val result = indexSearcher.search(query, 10)
+//        val explain = indexSearcher.explain(
+//            query, result
+//                .scoreDocs
+//                .sortedBy { it.score }.first().doc
+//        )
+//        println(explain.toString())
         val storedFields = indexSearcher.storedFields()
         return result
             .scoreDocs
             .sortedBy { it.score }
             .reversed()
             .map { storedFields.document(it.doc).getField("name").stringValue() }
-            .take(10)
     }
 
     private fun buildQuery(names: String): Query {
@@ -75,12 +80,22 @@ class DataService(
 
                 while (tokenStream.incrementToken()) {
                     builder.add(
-                        BooleanClause(
-                            WildcardQuery(
-                                Term("name", "$offsetAttribute*")
-                            ),
-                            BooleanClause.Occur.MUST
-                        )
+                        BooleanQuery.Builder()
+                            .add(
+                                WildcardQuery(
+                                    Term("name", "$offsetAttribute*")
+                                ),
+                                BooleanClause.Occur.SHOULD
+                            ).add(
+                                BoostQuery(
+                                    TermQuery(
+                                        Term("name", offsetAttribute.toString())
+                                    ),
+                                    2f
+                                ),
+                                BooleanClause.Occur.SHOULD
+                            ).build(),
+                        BooleanClause.Occur.MUST
                     )
                 }
             }
@@ -102,7 +117,7 @@ class DataService(
         val distinctNames = data
             .map { it.name }
             .distinct()
-        
+
         for (name in distinctNames) {
             val doc = Document()
             doc.add(TextField("name", name, Field.Store.YES))
