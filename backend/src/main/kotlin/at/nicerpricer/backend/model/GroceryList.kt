@@ -8,6 +8,6 @@ data class GroceryList(
 )
 
 data class GroceryItem(
-    val productName: String?,
+    val name: String?,
     val quantity: Int?,
 )

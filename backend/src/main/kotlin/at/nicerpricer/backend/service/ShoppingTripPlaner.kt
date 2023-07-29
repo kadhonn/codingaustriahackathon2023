@@ -31,7 +31,7 @@ class ShoppingTripPlaner(
 
     private fun findCheapestDataForItem(item: GroceryItem): Data {
         return data.asSequence()
-            .filter { it.name.equals(item.productName) }
+            .filter { it.name.equals(item.name) }
             .minBy { it.price!! }
     }
 
