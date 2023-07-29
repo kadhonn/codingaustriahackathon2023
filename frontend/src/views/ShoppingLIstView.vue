@@ -4,22 +4,29 @@ import ButtonComponent from "@/components/ButtonComponent.vue";
 import {ref} from "vue";
 import ListComponent from "@/components/ListComponent.vue";
 import type {ShoppingItem} from "@/api/dto";
+import {useListStore} from "@/stores/list";
 
 const authStore = useAuthStore()
+const listStore = useListStore()
 
-const items = ref([] as ShoppingItem[]);
+const items = ref(listStore.list ?? [] as ShoppingItem[]);
 const error = ref("")
 
 const getShoppingRoute = () => {
   navigator.geolocation.getCurrentPosition(
       position => {
-        console.log(position.coords.latitude);
-        console.log(position.coords.longitude);
+        // const response = await fetch(`https://api.nicerpricer.at/query?query=${input.value}`)
+        // suggestions.value = await response.json()
       },
       e => {
         error.value = e.message
       },
   )
+}
+
+const updateItems = (value: ShoppingItem[]) => {
+  items.value = value
+  listStore.setList(value)
 }
 </script>
 
@@ -28,8 +35,7 @@ const getShoppingRoute = () => {
     <div class="container">
       <h1>Erstelle deine Einkaufsliste</h1>
 
-
-      <ListComponent class="shoppingListContainer" :items="items" @change="value => items = value"/>
+      <ListComponent class="shoppingListContainer" :items="items" @change="value => updateItems(value)"/>
 
       <span class="spacer"/>
 
