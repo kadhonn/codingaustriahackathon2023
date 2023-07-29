@@ -23,9 +23,11 @@ class DataService(
         return data.first()
     }
 
-    fun query(nameQuery: String): List<Data> {
+    fun query(nameQuery: String): List<String> {
         return data.asSequence()
-            .filter { it.name!!.contains(nameQuery, true) }
+            .mapNotNull { it.name }
+            .filter { it.contains(nameQuery, true) }
+            .take(10)
             .toList()
     }
 

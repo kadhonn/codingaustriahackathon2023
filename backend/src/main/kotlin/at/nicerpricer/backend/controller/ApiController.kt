@@ -23,7 +23,7 @@ class ApiController @Autowired constructor(
     }
 
     @GetMapping("/query")
-    fun query(query: String): List<Data> {
+    fun query(query: String): List<String> {
         return dataService.query(query)
     }
 
