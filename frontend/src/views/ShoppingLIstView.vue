@@ -8,6 +8,19 @@ import type {ShoppingItem} from "@/api/dto";
 const authStore = useAuthStore()
 
 const items = ref([] as ShoppingItem[]);
+const error = ref("")
+
+const getShoppingRoute = () => {
+  navigator.geolocation.getCurrentPosition(
+      position => {
+        console.log(position.coords.latitude);
+        console.log(position.coords.longitude);
+      },
+      e => {
+        error.value = e.message
+      },
+  )
+}
 </script>
 
 <template>
@@ -20,7 +33,9 @@ const items = ref([] as ShoppingItem[]);
 
       <span class="spacer"/>
 
-      <ButtonComponent class="button">Jetzt einkaufen</ButtonComponent>
+      <p v-if="error" class="error">Bitte erlaube uns auf deinen Standort zuzugreifen um die beste Einkaufsroute zu
+        erstellen.</p>
+      <ButtonComponent class="button" @click="getShoppingRoute">Jetzt einkaufen</ButtonComponent>
     </div>
   </div>
 </template>
@@ -49,7 +64,6 @@ const items = ref([] as ShoppingItem[]);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
 }
 
 .button {
@@ -59,7 +73,19 @@ const items = ref([] as ShoppingItem[]);
 .shoppingListContainer {
   flex: 1 1 auto;
 
+  margin-top: 24px;
+
   overflow: auto;
+}
+
+.error {
+  background: #fbe9e9;
+  padding: 16px 32px;
+  border-radius: 12px;
+  border: 1px solid #e05151;
+  color: #e05151;
+  text-align: center;
+  font-weight: bold;
 }
 
 @media only screen and (max-width: 800px) {
