@@ -23,7 +23,7 @@ const selectTrip = (trip: ShoppingTrip) => {
 
     <TripComponent v-for="trip in trips" :key="trip.name" :trip="trip" @click="selectTrip(trip)"/>
     <span class="spacer"/>
-    <NotFoundComponent v-if="trips[0]?.unreachable" :items="trips[0]?.unreachable ?? []"/>
+    <NotFoundComponent v-if="Object.keys(trips[0]?.unreachable).length > 0" :items="trips[0]?.unreachable ?? []"/>
 
   </div>
 </template>

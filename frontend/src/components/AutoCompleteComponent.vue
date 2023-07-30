@@ -9,7 +9,12 @@ const emit = defineEmits<{
   change: [value: string]
 }>()
 
-const suggestions = ref([])
+type Suggestion = {
+  name: string,
+  isCategory: boolean
+}
+
+const suggestions = ref([] as Suggestion[])
 const input = ref(props.value ?? "")
 
 const getSuggestions = debounce(async () => {
@@ -18,12 +23,12 @@ const getSuggestions = debounce(async () => {
     return
   }
   const response = await fetch(`https://api.nicerpricer.at/query?query=${input.value}`)
-  suggestions.value = await response.json()
+  suggestions.value = await response.json() as Suggestion[]
 }, 300)
 
 const selectSuggestion = (suggestion: string) => {
   input.value = ''
-  suggestions.value = []
+  suggestions.value = [] as Suggestion[]
 
   emit('change', suggestion)
 }
@@ -40,10 +45,10 @@ const selectSuggestion = (suggestion: string) => {
     />
     <ul v-if="suggestions && suggestions.length > 0" class="autoCompleteSuggestionContainer">
       <li v-for="suggestion in suggestions"
-          :key="suggestion"
+          :key="suggestion.name"
           class="autoCompleteSuggestion"
-          @click="selectSuggestion(suggestion)"
-      >{{ suggestion }}
+          @click="selectSuggestion(suggestion.name)"
+      >{{ suggestion.name }}{{ suggestion.isCategory ? ' (egal welche)' : '' }}
       </li>
     </ul>
   </div>

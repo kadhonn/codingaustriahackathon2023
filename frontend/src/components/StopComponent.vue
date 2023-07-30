@@ -58,7 +58,7 @@ const showList = (stop: ShoppingStop) => {
   </div>
 
   <div v-if="currentList" class="modalContainer" @click.self="currentList = null">
-    <div class="stopItemsContainer">
+    <div class="modalListContainer">
       <ul>
         <li v-for="item in currentList.items" :key="item">{{item.quantity}} {{item.name}}</li>
       </ul>
@@ -77,7 +77,7 @@ const showList = (stop: ShoppingStop) => {
   flex-flow: column;
 }
 
-.stopItemsContainer {
+.stopItemsContainer, .modalListContainer {
   width: 90%;
   background: white;
   border-radius: 8px;
@@ -85,6 +85,10 @@ const showList = (stop: ShoppingStop) => {
 
   display: flex;
   flex-flow: column;
+}
+
+.modalListContainer {
+  max-width: 600px;
 }
 
 .stopContentContainer {
