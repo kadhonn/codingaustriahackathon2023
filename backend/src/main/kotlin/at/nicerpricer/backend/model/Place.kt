@@ -14,6 +14,7 @@ data class Place(
         val icon: String,
         val name: String,
         @JsonProperty("place_id") val placeId: String,
+        val vicinity: String,
 )
 
 data class Geometry(
