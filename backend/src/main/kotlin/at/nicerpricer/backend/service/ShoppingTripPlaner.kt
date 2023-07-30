@@ -35,7 +35,7 @@ class ShoppingTripPlaner(
                 }
             }
         }
-        val stops = findBestTripForPossibleStops(allStores, items)!!
+        val stops = findBestTripForPossibleStops(allStores.toList(), items)!!
 
         items = items.filter { !notFound.containsKey(it) }
 
@@ -118,6 +118,8 @@ class ShoppingTripPlaner(
             val place = getClosestPlace(groceryList.location!!.get(), store.store!!)
             if (place.isPresent) {
                 return Optional.of(Pair(place.get(), store.price!!))
+            } else {
+                allStores.remove(store.store!!)
             }
         }
         return Optional.empty()
