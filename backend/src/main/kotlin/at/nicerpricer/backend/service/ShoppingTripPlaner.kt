@@ -22,15 +22,47 @@ class ShoppingTripPlaner(
 
     private val notFound = mutableMapOf<GroceryItem, List<String>>()
     private val placeCache = mutableMapOf<String, Optional<Place>>()
-    private val allPlaces = mutableSetOf<String>()
+    private val allStores = mutableListOf<String>()
 
     fun calculate(): List<ShoppingTrip> {
-        val items = groceryList.items ?: emptyList()
+        var items = groceryList.items ?: emptyList()
+
+        items.forEach { item ->
+            val stores = data.byName[item.name!!.lowercase()]!!
+            stores.forEach {
+                if (!allStores.contains(it.store)) {
+                    allStores.add(it.store!!)
+                }
+            }
+        }
+        val stops = findBestTripForPossibleStops(allStores, items)!!
+
+        items = items.filter { !notFound.containsKey(it) }
+
+        val results = mutableListOf<ShoppingTrip>()
+        results.add(buildReturnValue(stops))
+        val maxStopsSize = stops.size
+        //TODO filter best against bigger ones
+        for (stopsSize in (maxStopsSize - 1) downTo 1) {
+            val result = findBestTripForStopsSize(stopsSize, items)
+            if (result != null) {
+                results.add(result)
+            }
+        }
+
+        return results
+    }
+
+    private fun findBestTripForPossibleStops(
+        possibleStores: List<String>,
+        items: List<GroceryItem>
+    ): MutableMap<Place, MutableList<Pair<GroceryItem, BigDecimal>>>? {
         val stops = mutableMapOf<Place, MutableList<Pair<GroceryItem, BigDecimal>>>()
         items.forEach { item ->
-            val stores = rankStores(item)
-            stores.forEach { allPlaces.add(it.store!!) }
-
+            val stores = rankStores(possibleStores, item)
+            if (stores.isEmpty()) {
+                return null
+            }
             val place = findFirstExistingPlaceWithPrice(stores)
             if (place.isPresent) {
                 val stopItems = stops[place.get().first] ?: mutableListOf()
@@ -40,8 +72,45 @@ class ShoppingTripPlaner(
                 notFound[item] = stores.map { shop -> shop.store as String }.toList()
             }
         }
+        return stops
+    }
 
-        return listOf(buildReturnValue(stops))
+    private fun findBestTripForStopsSize(stopsSize: Int, items: List<GroceryItem>): ShoppingTrip? {
+        val possibleTrips = mutableListOf<ShoppingTrip>()
+        val possibleStoreCombinations = mutableListOf<List<String>>()
+        calcAllPossibleStoreCombinations(stopsSize, possibleStoreCombinations, mutableListOf(), 0, 1)
+
+        for (storeCombination in possibleStoreCombinations) {
+            val stops = findBestTripForPossibleStops(storeCombination, items)
+            if (stops != null) {
+                possibleTrips.add(buildReturnValue(stops))
+            }
+        }
+        return possibleTrips.sortedBy { it.totalPrice }.firstOrNull()
+    }
+
+    private fun calcAllPossibleStoreCombinations(
+        stopsSize: Int,
+        possibleStoreCombinations: MutableList<List<String>>,
+        currentSelection: MutableList<String>,
+        startI: Int,
+        depth: Int
+    ) {
+        for (i in startI until allStores.size) {
+            currentSelection.add(allStores[i])
+            if (stopsSize == depth) {
+                possibleStoreCombinations.add(currentSelection.toList())
+            } else {
+                calcAllPossibleStoreCombinations(
+                    stopsSize,
+                    possibleStoreCombinations,
+                    currentSelection,
+                    i + 1,
+                    depth + 1
+                )
+            }
+            currentSelection.removeAt(currentSelection.size - 1)
+        }
     }
 
     private fun findFirstExistingPlaceWithPrice(stores: List<Data>): Optional<Pair<Place, BigDecimal>> {
@@ -56,7 +125,12 @@ class ShoppingTripPlaner(
 
     private fun buildReturnValue(stops: Map<Place, MutableList<Pair<GroceryItem, BigDecimal>>>): ShoppingTrip {
         return ShoppingTrip(
-            stops.entries.map { ShoppingStop(it.value.map { it.first }, it.key) },
+            stops.entries.map {
+                ShoppingStop(
+                    it.value.map { ShoppingItem(it.first.name, it.first.quantity, it.second) },
+                    it.key
+                )
+            },
             notFound, //TODO is the same for all solutions, so we duplicate it right now
             stops.entries.sumOf {
                 it.value.sumOf {
@@ -66,8 +140,9 @@ class ShoppingTripPlaner(
         )
     }
 
-    private fun rankStores(item: GroceryItem): List<Data> {
+    private fun rankStores(possibleStores: List<String>, item: GroceryItem): List<Data> {
         return data.byName[item.name!!.lowercase()]!!
+            .filter { possibleStores.contains(it.store) }
     }
 
     private fun getClosestPlace(location: Location, key: String): Optional<Place> {
