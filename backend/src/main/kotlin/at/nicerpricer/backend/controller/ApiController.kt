@@ -2,6 +2,7 @@ package at.nicerpricer.backend.controller
 
 import at.nicerpricer.backend.model.Data
 import at.nicerpricer.backend.model.GroceryList
+import at.nicerpricer.backend.model.QueryItem
 import at.nicerpricer.backend.model.ShoppingTrip
 import at.nicerpricer.backend.service.DataService
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +29,7 @@ class ApiController @Autowired constructor(
     }
 
     @GetMapping("/query")
-    fun query(query: String): List<String> {
+    fun query(query: String): List<QueryItem> {
         return dataService.query(query)
     }
 

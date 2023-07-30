@@ -1,9 +1,6 @@
 package at.nicerpricer.backend.service
 
-import at.nicerpricer.backend.model.Data
-import at.nicerpricer.backend.model.GroceryList
-import at.nicerpricer.backend.model.PreparedDataHolder
-import at.nicerpricer.backend.model.ShoppingTrip
+import at.nicerpricer.backend.model.*
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -32,27 +29,31 @@ val JACKSON_MAPPER: ObjectMapper = ObjectMapper()
 @Service
 class DataService(
     @Value("\${nicerpricer.file.path}") filePath: String,
+    @Value("\${nicerpricer.labels.path}") labelPath: String,
     @Value("\${nicerpricer.google.api-key}") private val googleApiKey: String,
 ) {
 
     private val data: PreparedDataHolder
+    private val categories: Map<String, List<String>>
     private val indexSearcher: IndexSearcher
     private val analyzer: Analyzer
 
     init {
         data = loadData(filePath)
+        categories = loadCategories(labelPath)
 
         val directory = ByteBuffersDirectory()
         analyzer = GermanAnalyzer()
         IndexWriter(directory, IndexWriterConfig(analyzer)).use {
             indexData(it, data.rawData)
+            indexCategories(it, categories)
         }
 
         val directoryReader = DirectoryReader.open(directory)
         indexSearcher = IndexSearcher(directoryReader)
     }
 
-    fun query(names: String): List<String> {
+    fun query(names: String): List<QueryItem> {
         val query = buildQuery(names)
         val result = indexSearcher.search(query, 10)
 //        val explain = indexSearcher.explain(
@@ -66,7 +67,12 @@ class DataService(
             .scoreDocs
             .sortedBy { it.score }
             .reversed()
-            .map { storedFields.document(it.doc).getField("name").stringValue() }
+            .map {
+                QueryItem(
+                    storedFields.document(it.doc).getField("name").stringValue(),
+                    storedFields.document(it.doc).getField("isCategory").stringValue().equals("true")
+                )
+            }
     }
 
     private fun buildQuery(names: String): Query {
@@ -102,7 +108,7 @@ class DataService(
     }
 
     fun shop(groceryList: GroceryList): List<ShoppingTrip> {
-        return ShoppingTripPlaner(googleApiKey, groceryList, data).calculate()
+        return ShoppingTripPlaner(googleApiKey, groceryList, data, categories).calculate()
     }
 
     private fun loadData(filePath: String): PreparedDataHolder {
@@ -110,7 +116,17 @@ class DataService(
             File(filePath),
             object : TypeReference<List<Data>>() {})
 
-        return PreparedDataHolder(rawData, rawData.groupBy { it.name!!.lowercase() }.mapValues { it.value.sortedBy { it.price } })
+        return PreparedDataHolder(
+            rawData,
+            rawData.groupBy { it.name!!.lowercase() }.mapValues { it.value.sortedBy { it.price } })
+    }
+
+    private fun loadCategories(labelPath: String): Map<String, List<String>> {
+        val rawLabels = JACKSON_MAPPER.readValue(
+            File(labelPath),
+            object : TypeReference<List<Label>>() {})
+
+        return rawLabels.groupBy({ it.productLabel!! }, { it.productName!! })
     }
 
     private fun indexData(indexWriter: IndexWriter, data: List<Data>) {
@@ -121,6 +137,16 @@ class DataService(
         for (name in distinctNames) {
             val doc = Document()
             doc.add(TextField("name", name, Field.Store.YES))
+            doc.add(TextField("isCategory", "false", Field.Store.YES))
+            indexWriter.addDocument(doc)
+        }
+    }
+
+    private fun indexCategories(indexWriter: IndexWriter, categories: Map<String, List<String>>) {
+        for (name in categories.keys) {
+            val doc = Document()
+            doc.add(TextField("name", name, Field.Store.YES))
+            doc.add(TextField("isCategory", "true", Field.Store.YES))
             indexWriter.addDocument(doc)
         }
     }

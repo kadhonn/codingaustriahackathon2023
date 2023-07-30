@@ -10,11 +10,11 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
 import java.util.*
 
-
 class ShoppingTripPlaner(
     private val googleApiKey: String,
     private val groceryList: GroceryList,
     private val data: PreparedDataHolder,
+    private val categories: Map<String, List<String>>,
 ) {
 
     private val httpClient = HttpClient.newBuilder().build()
@@ -28,7 +28,7 @@ class ShoppingTripPlaner(
         var items = groceryList.items ?: emptyList()
 
         items.forEach { item ->
-            val stores = data.byName[item.name!!.lowercase()]!!
+            val stores = allPossibleStoresSorted(item)
             stores.forEach {
                 if (!allStores.contains(it.store)) {
                     allStores.add(it.store!!)
@@ -63,10 +63,10 @@ class ShoppingTripPlaner(
             if (stores.isEmpty()) {
                 return null
             }
-            val place = findFirstExistingPlaceWithPrice(stores)
+            val place = findFirstExistingPlaceWithData(stores)
             if (place.isPresent) {
                 val stopItems = stops[place.get().first] ?: mutableListOf()
-                stopItems.add(Pair(item, place.get().second))
+                stopItems.add(Pair(GroceryItem(place.get().second.name, item.quantity), place.get().second.price!!))
                 stops[place.get().first] = stopItems
             } else {
                 notFound[item] = stores.map { shop -> shop.store as String }.toList()
@@ -113,11 +113,11 @@ class ShoppingTripPlaner(
         }
     }
 
-    private fun findFirstExistingPlaceWithPrice(stores: List<Data>): Optional<Pair<Place, BigDecimal>> {
+    private fun findFirstExistingPlaceWithData(stores: List<Data>): Optional<Pair<Place, Data>> {
         for (store in stores) {
             val place = getClosestPlace(groceryList.location!!.get(), store.store!!)
             if (place.isPresent) {
-                return Optional.of(Pair(place.get(), store.price!!))
+                return Optional.of(Pair(place.get(), store))
             } else {
                 allStores.remove(store.store!!)
             }
@@ -143,8 +143,23 @@ class ShoppingTripPlaner(
     }
 
     private fun rankStores(possibleStores: List<String>, item: GroceryItem): List<Data> {
-        return data.byName[item.name!!.lowercase()]!!
+        return allPossibleStoresSorted(item)
             .filter { possibleStores.contains(it.store) }
+    }
+
+    private fun allPossibleStoresSorted(item: GroceryItem): List<Data> {
+        if (!categories.containsKey(item.name)) {
+            return data.byName[item.name!!.lowercase()]!!
+        } else {
+            val category = categories[item.name]!!
+            val result = allStores.mapNotNull { store ->
+                category.mapNotNull { categoryItem ->
+                    data.byName[categoryItem.lowercase()]?.firstOrNull { it.store == store }
+                }
+                    .sortedBy { it.price }.firstOrNull()
+            }
+            return result
+        }
     }
 
     private fun getClosestPlace(location: Location, key: String): Optional<Place> {
@@ -168,3 +183,4 @@ class ShoppingTripPlaner(
         }
     }
 }
+

@@ -1,5 +1,6 @@
 package at.nicerpricer.backend.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -28,4 +29,9 @@ data class Data(
 data class DataHistory(
     val date: LocalDate?,
     val price: BigDecimal?,
+)
+
+data class Label(
+    @JsonProperty("product_name") val productName: String?,
+    @JsonProperty("product_label") val productLabel: String?,
 )

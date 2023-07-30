@@ -16,3 +16,8 @@ data class GroceryItem(
         val name: String?,
         val quantity: Int?,
 )
+
+data class QueryItem(
+        val name: String?,
+        val isCategory: Boolean?,
+)
