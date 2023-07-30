@@ -3,6 +3,11 @@ package at.nicerpricer.backend.model
 import java.math.BigDecimal
 import java.time.LocalDate
 
+data class PreparedDataHolder(
+    val rawData: List<Data>,
+    val byName: Map<String, List<Data>>
+)
+
 data class Data(
     val store: String?,
     val id: String?,

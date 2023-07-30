@@ -2,6 +2,7 @@ package at.nicerpricer.backend.service
 
 import at.nicerpricer.backend.model.Data
 import at.nicerpricer.backend.model.GroceryList
+import at.nicerpricer.backend.model.PreparedDataHolder
 import at.nicerpricer.backend.model.ShoppingTrip
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -30,11 +31,11 @@ val JACKSON_MAPPER: ObjectMapper = ObjectMapper()
 
 @Service
 class DataService(
-        @Value("\${nicerpricer.file.path}") filePath: String,
-        @Value("\${nicerpricer.google.api-key}") private val googleApiKey: String,
+    @Value("\${nicerpricer.file.path}") filePath: String,
+    @Value("\${nicerpricer.google.api-key}") private val googleApiKey: String,
 ) {
 
-    private val data: List<Data>
+    private val data: PreparedDataHolder
     private val indexSearcher: IndexSearcher
     private val analyzer: Analyzer
 
@@ -44,15 +45,11 @@ class DataService(
         val directory = ByteBuffersDirectory()
         analyzer = GermanAnalyzer()
         IndexWriter(directory, IndexWriterConfig(analyzer)).use {
-            indexData(it, data)
+            indexData(it, data.rawData)
         }
 
         val directoryReader = DirectoryReader.open(directory)
         indexSearcher = IndexSearcher(directoryReader)
-    }
-
-    fun first(): Data {
-        return data.first()
     }
 
     fun query(names: String): List<String> {
@@ -104,14 +101,16 @@ class DataService(
         return builder.build()
     }
 
-    fun shop(groceryList: GroceryList): ShoppingTrip {
+    fun shop(groceryList: GroceryList): List<ShoppingTrip> {
         return ShoppingTripPlaner(googleApiKey, groceryList, data).calculate()
     }
 
-    private fun loadData(filePath: String): List<Data> {
-        return JACKSON_MAPPER.readValue(
+    private fun loadData(filePath: String): PreparedDataHolder {
+        val rawData = JACKSON_MAPPER.readValue(
             File(filePath),
             object : TypeReference<List<Data>>() {})
+
+        return PreparedDataHolder(rawData, rawData.groupBy { it.name!!.lowercase() }.mapValues { it.value.sortedBy { it.price } })
     }
 
     private fun indexData(indexWriter: IndexWriter, data: List<Data>) {

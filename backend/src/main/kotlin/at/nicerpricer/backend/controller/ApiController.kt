@@ -23,7 +23,7 @@ class ApiController @Autowired constructor(
 
     @PostMapping("/shop")
     @ResponseBody
-    fun shop(@RequestBody groceryList: GroceryList): ShoppingTrip {
+    fun shop(@RequestBody groceryList: GroceryList): List<ShoppingTrip> {
         return dataService.shop(groceryList)
     }
 
