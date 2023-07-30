@@ -33,8 +33,8 @@ class ApiController @Autowired constructor(
         return dataService.query(query)
     }
 
-    @PostMapping("/data")
-    fun post(data: Data) {
-        println(data)
+    @GetMapping("/history")
+    fun history(item: String): List<Data> {
+        return dataService.history(item)
     }
 }

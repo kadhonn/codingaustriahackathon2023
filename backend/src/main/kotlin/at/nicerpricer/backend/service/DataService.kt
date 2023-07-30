@@ -119,7 +119,8 @@ class DataService(
         return PreparedDataHolder(
             rawData,
             rawData.groupBy { it.name!!.lowercase() }.mapValues { it.value.sortedBy { it.price } },
-            rawData.mapNotNull { it.store }.toSet())
+            rawData.mapNotNull { it.store }.toSet()
+        )
     }
 
     private fun loadCategories(labelPath: String): Map<String, List<String>> {
@@ -150,5 +151,9 @@ class DataService(
             doc.add(TextField("isCategory", "true", Field.Store.YES))
             indexWriter.addDocument(doc)
         }
+    }
+
+    fun history(item: String): List<Data> {
+        return Util.allPossibleStoresSorted(item, categories, data)
     }
 }

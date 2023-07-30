@@ -1,6 +1,7 @@
 package at.nicerpricer.backend.service
 
 import at.nicerpricer.backend.model.*
+import at.nicerpricer.backend.service.Util.allPossibleStoresSorted
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
@@ -28,7 +29,7 @@ class ShoppingTripPlaner(
         var items = groceryList.items ?: emptyList()
 
         items.forEach { item ->
-            val stores = allPossibleStoresSorted(item)
+            val stores = allPossibleStoresSorted(item.name!!, categories, data)
             stores.forEach {
                 if (!allStores.contains(it.store)) {
                     allStores.add(it.store!!)
@@ -119,7 +120,7 @@ class ShoppingTripPlaner(
             if (place.isPresent) {
                 return Optional.of(Pair(place.get(), store))
             } else {
-                allStores.remove(store.store!!)
+                allStores.remove(store.store)
             }
         }
         return Optional.empty()
@@ -143,23 +144,8 @@ class ShoppingTripPlaner(
     }
 
     private fun rankStores(possibleStores: List<String>, item: GroceryItem): List<Data> {
-        return allPossibleStoresSorted(item)
+        return allPossibleStoresSorted(item.name!!, categories, data)
             .filter { possibleStores.contains(it.store) }
-    }
-
-    private fun allPossibleStoresSorted(item: GroceryItem): List<Data> {
-        if (!categories.containsKey(item.name)) {
-            return data.byName[item.name!!.lowercase()]!!
-        } else {
-            val category = categories[item.name]!!
-            val result = data.stores.mapNotNull { store ->
-                category.mapNotNull { categoryItem ->
-                    data.byName[categoryItem.lowercase()]?.firstOrNull { it.store == store }
-                }
-                    .sortedBy { it.price }.firstOrNull()
-            }
-            return result
-        }
     }
 
     private fun getClosestPlace(location: Location, key: String): Optional<Place> {
