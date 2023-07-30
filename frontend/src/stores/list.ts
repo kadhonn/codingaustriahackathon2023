@@ -11,7 +11,7 @@ export const useListStore = defineStore('list', {
     },
     actions: {
         setList(list: ShoppingItem[]) {
-            this.list = {list: list}
+            this.list = list
             localStorage.setItem(listKey, JSON.stringify(list));
         }
     }
