@@ -6,7 +6,8 @@ import java.time.LocalDate
 
 data class PreparedDataHolder(
     val rawData: List<Data>,
-    val byName: Map<String, List<Data>>
+    val byName: Map<String, List<Data>>,
+    val stores: Set<String>,
 )
 
 data class Data(

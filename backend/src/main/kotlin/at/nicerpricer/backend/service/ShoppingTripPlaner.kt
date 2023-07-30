@@ -152,7 +152,7 @@ class ShoppingTripPlaner(
             return data.byName[item.name!!.lowercase()]!!
         } else {
             val category = categories[item.name]!!
-            val result = allStores.mapNotNull { store ->
+            val result = data.stores.mapNotNull { store ->
                 category.mapNotNull { categoryItem ->
                     data.byName[categoryItem.lowercase()]?.firstOrNull { it.store == store }
                 }

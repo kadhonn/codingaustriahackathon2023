@@ -118,7 +118,8 @@ class DataService(
 
         return PreparedDataHolder(
             rawData,
-            rawData.groupBy { it.name!!.lowercase() }.mapValues { it.value.sortedBy { it.price } })
+            rawData.groupBy { it.name!!.lowercase() }.mapValues { it.value.sortedBy { it.price } },
+            rawData.mapNotNull { it.store }.toSet())
     }
 
     private fun loadCategories(labelPath: String): Map<String, List<String>> {
