@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
-  variant?: 'primary' | 'secondary'
+  variant?: 'primary' | 'secondary',
+  isLoading?: boolean
 }>()
 defineEmits(['click'])
 </script>
@@ -13,7 +14,8 @@ defineEmits(['click'])
       }"
       @click="$emit('click')"
   >
-    <slot/>
+    <img v-if="isLoading" class="loader" src="../assets/coin-loader.gif"/>
+    <slot v-else/>
   </button>
 </template>
 
@@ -40,5 +42,8 @@ defineEmits(['click'])
   padding: 8px 16px;
 }
 
-
+.loader {
+  height: 24px;
+  width: 24px;
+}
 </style>

@@ -3,30 +3,45 @@ import {useAuthStore} from "@/stores/auth";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import {ref} from "vue";
 import ListComponent from "@/components/ListComponent.vue";
-import type {ShoppingItem} from "@/api/dto";
-import {useListStore} from "@/stores/list";
+import type {Coordinates, ShoppingItem, ShoppingTrip} from "@/api/dto";
+import router from "@/router";
 
 const authStore = useAuthStore()
-const listStore = useListStore()
 
-const items = ref(listStore.list ?? [] as ShoppingItem[]);
+const items = ref(authStore.list ?? [] as ShoppingItem[]);
 const error = ref("")
+
+const isLoading = ref(false)
 
 const getShoppingRoute = () => {
   navigator.geolocation.getCurrentPosition(
-      position => {
-        // const response = await fetch(`https://api.nicerpricer.at/query?query=${input.value}`)
-        // suggestions.value = await response.json()
+      async position => {
+        const location = {latitude: position.coords.latitude, longitude: position.coords.longitude} as Coordinates
+        authStore.setLocation(location)
+
+        isLoading.value = true
+
+        const response = await fetch(`https://api.nicerpricer.at/shop`, {
+          method: "POST",
+          headers:{'content-type': 'application/json'},
+          body: JSON.stringify({items: items.value, location}),
+        })
+        const trips = await response.json() as ShoppingTrip[]
+        authStore.setTrips(trips)
+
+        await router.push({path: '/trips'})
+        isLoading.value = false
       },
       e => {
         error.value = e.message
+        isLoading.value = false
       },
   )
 }
 
 const updateItems = (value: ShoppingItem[]) => {
   items.value = value
-  listStore.setList(value)
+  authStore.setList(value)
 }
 </script>
 
@@ -41,7 +56,7 @@ const updateItems = (value: ShoppingItem[]) => {
 
       <p v-if="error" class="error">Bitte erlaube uns auf deinen Standort zuzugreifen um die beste Einkaufsroute zu
         erstellen.</p>
-      <ButtonComponent class="button" @click="getShoppingRoute">Jetzt einkaufen</ButtonComponent>
+      <ButtonComponent class="button" @click="getShoppingRoute" :is-loading="isLoading">Jetzt einkaufen</ButtonComponent>
     </div>
   </div>
 </template>

@@ -4,14 +4,21 @@ export type ShoppingItem = {
     quantity: number;
 }
 
+export type Coordinates = {
+    latitude: number;
+    longitude: number;
+}
+
 export type PlaceGeometry = {
-    location: Location
+    location: Coordinates
 }
 
 export type Place = {
+    place_id: string,
     geometry: PlaceGeometry,
     icon: string,
-    name: string
+    name: string,
+    vicinity: string,
 }
 
 export type ShoppingStop = {
@@ -20,6 +27,7 @@ export type ShoppingStop = {
 }
 
 export type ShoppingTrip = {
+    totalPrice: number,
     stops: ShoppingStop[],
-    unreachable: ShoppingItem
+    unreachable?: ShoppingItem
 }

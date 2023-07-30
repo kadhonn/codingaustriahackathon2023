@@ -1,0 +1,6 @@
+{
+  "short_name": "Nicer Pricer",
+  "name": "Finde die billigste Einkaufstour",
+  "display": "standalone",
+  "scope": "/"
+}
