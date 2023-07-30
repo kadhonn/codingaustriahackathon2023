@@ -15,7 +15,7 @@ data class Data(
     val name: String?,
     val description: String?,
     val price: BigDecimal?,
-    val priceHistory: List<DataHistory>,
+    val priceHistory: List<DataHistory>?,
     val isWeighted: Boolean?,
     val unit: String?,
     val quantity: Int?,
